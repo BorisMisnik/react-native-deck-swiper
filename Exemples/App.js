@@ -5,8 +5,13 @@ import { StyleSheet, View, Text, Button } from 'react-native'
 export default class Exemple extends Component {
   constructor (props) {
     super(props)
+    let cards = [];
+    for (let i = 0; i <= 50; i++) {
+        cards.push(i.toString());
+    }
+
     this.state = {
-      cards: ['1', '2', '3'],
+      cards: cards,
       swipedAllCards: false,
       swipeDirection: '',
       isSwipingBack: false,
@@ -65,6 +70,8 @@ export default class Exemple extends Component {
           cardVerticalMargin={80}
           renderCard={this.renderCard}
           onSwipedAll={this.onSwipedAllCards}
+          disableTopSwipe={true}
+          disableBottomSwipe={true}
           overlayLabels={{
             bottom: {
               title: 'BLEAH',
