@@ -399,7 +399,6 @@ class Swiper extends React.Component {
         y: y * 4.5
       },
       duration: this.props.swipeAnimationDuration,
-      useNativeDriver: true,
     }).start(() => {
       mustDecrementCardIndex = mustDecrementCardIndex
         ? true
@@ -422,7 +421,6 @@ class Swiper extends React.Component {
       toValue: 1,
       friction: this.props.zoomFriction,
       duration: this.props.zoomAnimationDuration,
-      useNativeDriver: true,
     }).start()
   }
 
