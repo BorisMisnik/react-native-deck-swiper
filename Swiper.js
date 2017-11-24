@@ -398,7 +398,8 @@ class Swiper extends React.Component {
         x: x * 4.5,
         y: y * 4.5
       },
-      duration: this.props.swipeAnimationDuration
+      duration: this.props.swipeAnimationDuration,
+      useNativeDriver: true,
     }).start(() => {
       mustDecrementCardIndex = mustDecrementCardIndex
         ? true
@@ -420,7 +421,8 @@ class Swiper extends React.Component {
     Animated.spring(this.state.scale, {
       toValue: 1,
       friction: this.props.zoomFriction,
-      duration: this.props.zoomAnimationDuration
+      duration: this.props.zoomAnimationDuration,
+      useNativeDriver: true,
     }).start()
   }
 
@@ -630,6 +632,7 @@ class Swiper extends React.Component {
   render () {
     return (
       <View
+        renderToHardwareTextureAndroid={true}
         style={[
           styles.container,
           {
@@ -656,7 +659,7 @@ class Swiper extends React.Component {
     }
 
     return (
-      <View style={[styles.childrenViewStyle, { zIndex: zIndex }]}>
+      <View style={[styles.childrenViewStyle, { zIndex: zIndex }]} renderToHardwareTextureAndroid={true}>
         {children}
       </View>
     )
@@ -678,6 +681,7 @@ class Swiper extends React.Component {
     if (!this.props.disablePanHandlers) {
       return (
         <Animated.View
+          renderToHardwareTextureAndroid={true}
           style={swipableCardStyle}
           key={firstCardIndex}
           {...this._panResponder.panHandlers}
@@ -690,6 +694,7 @@ class Swiper extends React.Component {
     } else {
         return (
           <Animated.View
+            renderToHardwareTextureAndroid={true}
             style={swipableCardStyle}
             key={firstCardIndex}
           >
@@ -716,7 +721,7 @@ class Swiper extends React.Component {
     }
 
     return (
-      <Animated.View key={secondCardIndex} style={secondCardZoomStyle}>
+      <Animated.View key={secondCardIndex} style={secondCardZoomStyle} renderToHardwareTextureAndroid={true}>
         {secondCard}
       </Animated.View>
     )
@@ -729,7 +734,7 @@ class Swiper extends React.Component {
     const previousCardStyle = this.calculateSwipeBackCardStyle()
     const previousCard = this.props.renderCard(previousCardContent)
     return (
-      <Animated.View key={previousCardIndex} style={previousCardStyle}>
+      <Animated.View key={previousCardIndex} style={previousCardStyle} renderToHardwareTextureAndroid={true}>
         {previousCard}
       </Animated.View>
     )
@@ -763,7 +768,7 @@ class Swiper extends React.Component {
     }
 
     return (
-      <Animated.View style={this.calculateOverlayElementStyle()}>
+      <Animated.View style={this.calculateOverlayElementStyle()} renderToHardwareTextureAndroid={true}>
         { overlayLabels[labelType].element2 &&
           overlayLabels[labelType].element2
         }
@@ -800,7 +805,7 @@ class Swiper extends React.Component {
     }
 
     return (
-      <Animated.View style={this.calculateOverlayLabelWrapperStyle()}>
+      <Animated.View style={this.calculateOverlayLabelWrapperStyle()} renderToHardwareTextureAndroid={true}>
         { !overlayLabels[labelType].element &&
           <Text style={this.calculateOverlayLabelStyle()}>
             {overlayLabels[labelType].title}
