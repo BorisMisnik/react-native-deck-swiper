@@ -36,8 +36,9 @@ class Swiper extends React.Component {
   }
 
   componentWillReceiveProps (newProps) {
+    let condition = newProps.withoutLabels !== this.props.withoutLabels;
     this.setState({
-      firstCardIndex: newProps.cardIndex || 0,
+      firstCardIndex: condition ? this.state.firstCardIndex : newProps.cardIndex || 0,
       cards: newProps.cards,
       previousCardX: new Animated.Value(newProps.previousCardInitialPositionX),
       previousCardY: new Animated.Value(newProps.previousCardInitialPositionY),
@@ -45,6 +46,9 @@ class Swiper extends React.Component {
       panResponderLocked: newProps.cards && newProps.cards.length === 0,
       slideGesture: false
     }, () => {
+      if (condition) {
+        return;
+      }
       this.setState({
         secondCardIndex: this.calculateSecondCardIndex(newProps.cardIndex || 0),
         previousCardIndex: this.calculatePreviousCardIndex(newProps.cardIndex || 0)
@@ -689,7 +693,7 @@ class Swiper extends React.Component {
           {renderElement}
         </Animated.View>
       );
-    } else {
+    }  else {
         return (
           <Animated.View
             renderToHardwareTextureAndroid={true}
@@ -765,6 +769,10 @@ class Swiper extends React.Component {
       return null
     }
 
+    if (this.props.withoutLabels) {
+      return null;
+    }
+
     return (
       <Animated.View style={this.calculateOverlayElementStyle()} renderToHardwareTextureAndroid={true}>
         { overlayLabels[labelType].element2 &&
@@ -800,6 +808,10 @@ class Swiper extends React.Component {
       directionSwipeLabelDisabled
     ) {
       return null
+    }
+
+    if (this.props.withoutLabels) {
+      return null;
     }
 
     return (
