@@ -26,7 +26,8 @@ class Swiper extends React.Component {
       swipedAllCards: false,
       panResponderLocked: false,
       labelType: LABEL_TYPES.NONE,
-      slideGesture: false
+      slideGesture: false,
+      withoutLabels: this.props.withoutLabels,
     }
 
     this.state.secondCardIndex = this.calculateSecondCardIndex(props.cardIndex)
@@ -35,20 +36,19 @@ class Swiper extends React.Component {
     )
   }
 
+
   componentWillReceiveProps (newProps) {
-    let condition = newProps.withoutLabels !== this.props.withoutLabels;
     this.setState({
-      firstCardIndex: condition ? this.state.firstCardIndex : newProps.cardIndex || 0,
+      firstCardIndex: newProps.cardIndex || 0,
       cards: newProps.cards,
       previousCardX: new Animated.Value(newProps.previousCardInitialPositionX),
       previousCardY: new Animated.Value(newProps.previousCardInitialPositionY),
       swipedAllCards: false,
       panResponderLocked: newProps.cards && newProps.cards.length === 0,
-      slideGesture: false
+      slideGesture: false,
+      withoutLabels: newProps.withoutLabels,
+      // secondCardIndex: (newProps.cardIndex || 0) + 1,
     }, () => {
-      if (condition) {
-        return;
-      }
       this.setState({
         secondCardIndex: this.calculateSecondCardIndex(newProps.cardIndex || 0),
         previousCardIndex: this.calculatePreviousCardIndex(newProps.cardIndex || 0)
@@ -711,6 +711,10 @@ class Swiper extends React.Component {
     const { secondCardIndex } = this.state
     const { cards, renderCard } = this.props
 
+    if (secondCardIndex === this.state.firstCardIndex) {
+      return null;
+    }
+
     const secondCardZoomStyle = this.calculateSecondCardZoomStyle()
     const secondCardContent = cards[secondCardIndex]
     const secondCard = renderCard(secondCardContent)
@@ -718,6 +722,7 @@ class Swiper extends React.Component {
     const notInfinite = !this.props.infinite
     const lastCardOrSwipedAllCards =
       secondCardIndex === 0 || this.state.swipedAllCards
+
     if (notInfinite && lastCardOrSwipedAllCards) {
       return <Animated.View key={secondCardIndex} />
     }
@@ -769,7 +774,7 @@ class Swiper extends React.Component {
       return null
     }
 
-    if (this.props.withoutLabels) {
+    if (this.state.withoutLabels) {
       return null;
     }
 
@@ -810,7 +815,7 @@ class Swiper extends React.Component {
       return null
     }
 
-    if (this.props.withoutLabels) {
+    if (this.state.withoutLabels) {
       return null;
     }
 
