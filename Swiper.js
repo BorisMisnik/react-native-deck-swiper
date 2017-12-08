@@ -339,6 +339,7 @@ class Swiper extends React.Component {
 
   swipeBack = (cb) => {
     this.state.previousCardX.setValue(this.state.previousCardX._value * (this.isSwipedRight ? 1 : -1));
+    this.disableTap = true;
 
     Animated.parallel([
         Animated.timing(this.state.previousCardX, {
@@ -351,6 +352,7 @@ class Swiper extends React.Component {
         })
     ]).start(() => {
         this.decrementCardIndex(cb)
+        this.disableTap = false;
     })
   }
 
