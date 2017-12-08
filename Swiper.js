@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { PanResponder, Text, View, Dimensions, Animated } from 'react-native'
+import { PanResponder, Text, View, Dimensions, Animated, Image } from 'react-native'
 import styles from './styles'
 
 const { height, width } = Dimensions.get('window')
@@ -337,13 +337,20 @@ class Swiper extends React.Component {
     })
   }
 
-  swipeBack = cb => {
-    Animated.spring(this.state.previousCardY, {
-      toValue: 0,
-      friction: this.props.swipeBackFriction,
-      duration: this.props.swipeBackAnimationDuration
-    }).start(() => {
-      this.decrementCardIndex(cb)
+  swipeBack = (cb) => {
+    this.state.previousCardX.setValue(this.state.previousCardX._value * (this.isSwipedRight ? 1 : -1));
+
+    Animated.parallel([
+        Animated.timing(this.state.previousCardX, {
+            toValue: 0,
+            duration: this.props.swipeBackAnimationDuration,
+        }),
+        Animated.timing(this.state.previousCardY, {
+            toValue: 0,
+            duration: this.props.swipeBackAnimationDuration,
+        })
+    ]).start(() => {
+        this.decrementCardIndex(cb)
     })
   }
 
@@ -397,6 +404,7 @@ class Swiper extends React.Component {
     mustDecrementCardIndex = false
   ) => {
     this.disableTap = true;
+    this.isSwipedRight = x > 0;
     Animated.timing(this.state.pan, {
       toValue: {
         x: x * 4.5,
@@ -446,7 +454,6 @@ class Swiper extends React.Component {
     const { firstCardIndex } = this.state
     const lastCardIndex = this.state.cards.length - 1
     const previousCardIndex = firstCardIndex - 1
-
     const newCardIndex =
       firstCardIndex === 0 ? lastCardIndex : previousCardIndex
 
@@ -553,18 +560,25 @@ class Swiper extends React.Component {
     this.customCardStyle
   ]
 
-  calculateSwipeBackCardStyle = () => [
-    styles.card,
-    this.cardStyle,
-    {
-      zIndex: 4,
-      transform: [
-        { translateX: this.state.previousCardX },
-        { translateY: this.state.previousCardY }
+  calculateSwipeBackCardStyle = () => {
+      let rotation = this.state.previousCardX.interpolate({
+          inputRange: this.props.inputRotationRange,
+          outputRange: this.props.outputRotationRange
+      })
+      return [
+          styles.card,
+          this.cardStyle,
+          {
+              zIndex: 4,
+              transform: [
+                  { translateX: this.state.previousCardX },
+                  { translateY: this.state.previousCardY },
+                  { rotate: rotation }
+              ]
+          },
+          this.customCardStyle
       ]
-    },
-    this.customCardStyle
-  ]
+  }
 
   interpolateCardOpacity = () => {
     const animatedValueX = Math.abs(this._animatedValueX)
@@ -738,10 +752,20 @@ class Swiper extends React.Component {
     const { previousCardIndex } = this.state
     const { cards } = this.props
     const previousCardContent = cards[previousCardIndex]
+
+    if (this.state.firstCardIndex === 0) {
+        return null;
+    }
+
+    if (previousCardIndex === this.state.firstCardIndex) {
+      return null;
+    }
+
     const previousCardStyle = this.calculateSwipeBackCardStyle()
     const previousCard = this.props.renderCard(previousCardContent)
+
     return (
-      <Animated.View key={previousCardIndex} style={previousCardStyle} renderToHardwareTextureAndroid={true}>
+      <Animated.View key={previousCardIndex} style={previousCardStyle} renderToHardwareTextureAndroid={true} >
         {previousCard}
       </Animated.View>
     )
