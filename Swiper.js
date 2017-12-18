@@ -803,9 +803,12 @@ class Swiper extends React.Component {
     if (this.state.withoutLabels) {
       return null;
     }
-
+      
     return (
-      <Animated.View style={this.calculateOverlayElementStyle()} renderToHardwareTextureAndroid={true}>
+      <Animated.View
+          pointerEvents={'none'}
+          style={this.calculateOverlayElementStyle()}
+          renderToHardwareTextureAndroid={true}>
         { overlayLabels[labelType].element2 &&
           overlayLabels[labelType].element2
         }
@@ -845,8 +848,12 @@ class Swiper extends React.Component {
       return null;
     }
 
+
     return (
-      <Animated.View style={this.calculateOverlayLabelWrapperStyle()} renderToHardwareTextureAndroid={true}>
+      <Animated.View
+          pointerEvents={'none'}
+          style={this.calculateOverlayLabelWrapperStyle()}
+          renderToHardwareTextureAndroid={true}>
         { !overlayLabels[labelType].element &&
           <Text style={this.calculateOverlayLabelStyle()}>
             {overlayLabels[labelType].title}
