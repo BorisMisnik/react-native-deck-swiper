@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { PanResponder, Text, View, Dimensions, Animated, Image } from 'react-native'
 import styles from './styles'
-
+import ViewWithoutOverflow from 'react-native-view-without-overflow';
 const { height, width } = Dimensions.get('window')
 const LABEL_TYPES = {
   NONE: 'none',
@@ -649,8 +649,7 @@ class Swiper extends React.Component {
 
   render () {
     return (
-      <View
-        renderToHardwareTextureAndroid={true}
+      <ViewWithoutOverflow
         style={[
           styles.container,
           {
@@ -664,7 +663,7 @@ class Swiper extends React.Component {
         {this.renderFirstCard()}
         {this.props.showSecondCard ? this.renderSecondCard() : null}
         {this.props.swipeBackCard ? this.renderSwipeBackCard() : null}
-      </View>
+      </ViewWithoutOverflow>
     )
   }
 
