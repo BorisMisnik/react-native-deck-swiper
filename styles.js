@@ -3,17 +3,18 @@ import { StyleSheet } from 'react-native'
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    position: 'absolute'
-  },
-  container: {
-    alignItems: 'stretch',
-    position: 'absolute',
     top: 0,
     left: 0,
+    bottom: 0,
     right: 0,
-    bottom: 0
+    position: 'absolute',
+  },
+  container: {
+    flex: 1,
+    position: 'relative',
   },
   childrenViewStyle: {
+    flex: 1,
     position: 'absolute',
     top: 0,
     left: 0,
