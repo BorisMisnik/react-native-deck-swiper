@@ -40,7 +40,6 @@ class Swiper extends React.Component {
   componentWillReceiveProps (newProps) {
     this.panResponderLocked = newProps.cards && newProps.cards.length <= 1;
     this.state.labelType = 'none';
-
     if (this.props.cards.length === newProps.cards.length) {
         return;
     }
@@ -52,9 +51,8 @@ class Swiper extends React.Component {
       previousCardY: new Animated.Value(newProps.previousCardInitialPositionY),
       swipedAllCards: false,
       panResponderLocked: newProps.cards && newProps.cards.length <= 1,
-      // secondCardIndex: (newProps.cardIndex || 0) + 1,
-        secondCardIndex: this.calculateSecondCardIndex(newProps.cardIndex || 0),
-        previousCardIndex: this.calculatePreviousCardIndex(newProps.cardIndex || 0)
+      secondCardIndex: this.calculateSecondCardIndex(newProps.cardIndex || 0, newProps.cards),
+      previousCardIndex: this.calculatePreviousCardIndex(newProps.cardIndex || 0)
     }, () => {
       // this.setState({
       //
@@ -64,8 +62,9 @@ class Swiper extends React.Component {
     this.initializeCardStyle();
   }
 
-  calculateSecondCardIndex = firstCardIndex => {
-    const cardIndexAtLastIndex = firstCardIndex === this.state.cards.length - 1
+  calculateSecondCardIndex = (firstCardIndex, newArray) => {
+    let array = newArray || this.state.cards;
+    const cardIndexAtLastIndex = firstCardIndex === array.length - 1
     return cardIndexAtLastIndex ? 0 : firstCardIndex + 1
   }
 
@@ -731,7 +730,6 @@ class Swiper extends React.Component {
   renderSecondCard = () => {
     const { secondCardIndex } = this.state
     const { cards, renderCard } = this.props
-
     if (secondCardIndex === this.state.firstCardIndex) {
       return null;
     }
