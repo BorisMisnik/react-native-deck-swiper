@@ -40,6 +40,7 @@ class Swiper extends React.Component {
   componentWillReceiveProps (newProps) {
     this.panResponderLocked = newProps.cards && newProps.cards.length <= 1;
     this.state.labelType = 'none';
+
     if (this.props.cards.length === newProps.cards.length) {
         return;
     }
@@ -51,8 +52,9 @@ class Swiper extends React.Component {
       previousCardY: new Animated.Value(newProps.previousCardInitialPositionY),
       swipedAllCards: false,
       panResponderLocked: newProps.cards && newProps.cards.length <= 1,
-      secondCardIndex: this.calculateSecondCardIndex(newProps.cardIndex || 0, newProps.cards),
-      previousCardIndex: this.calculatePreviousCardIndex(newProps.cardIndex || 0)
+      // secondCardIndex: (newProps.cardIndex || 0) + 1,
+        secondCardIndex: this.calculateSecondCardIndex(newProps.cardIndex || 0),
+        previousCardIndex: this.calculatePreviousCardIndex(newProps.cardIndex || 0)
     }, () => {
       // this.setState({
       //
@@ -62,9 +64,8 @@ class Swiper extends React.Component {
     this.initializeCardStyle();
   }
 
-  calculateSecondCardIndex = (firstCardIndex, newArray) => {
-    let array = newArray || this.state.cards;
-    const cardIndexAtLastIndex = firstCardIndex === array.length - 1
+  calculateSecondCardIndex = firstCardIndex => {
+    const cardIndexAtLastIndex = firstCardIndex === this.state.cards.length - 1
     return cardIndexAtLastIndex ? 0 : firstCardIndex + 1
   }
 
@@ -193,10 +194,11 @@ class Swiper extends React.Component {
     if (this.props.disablePanHandlers) {
       return;
     }
+
     if (!this.panResponderLocked) {
       this.state.pan.setOffset({
-        x: this._animatedValueX,
-        y: this._animatedValueY
+        x: 0,
+        y: 0
       })
     }
 
@@ -233,7 +235,6 @@ class Swiper extends React.Component {
     if (this.props.disablePanHandlers) {
       return;
     }
-
     if (this.panResponderLocked) {
       this.state.pan.setValue({
         x: 0,
@@ -246,7 +247,6 @@ class Swiper extends React.Component {
 
       return
     }
-
     const { horizontalThreshold, verticalThreshold } = this.props
 
     const animatedValueX = Math.abs(this._animatedValueX)
@@ -264,13 +264,23 @@ class Swiper extends React.Component {
       this.panResponderLocked = true;
       this.swipeCard(onSwipeDirectionCallback)
       this.zoomNextCard()
-
     } else {
       this.resetTopCard()
     }
 
+    let onTapCardDeadZone = 5;
+    if (
+        this._animatedValueX < -onTapCardDeadZone ||
+        this._animatedValueX > onTapCardDeadZone
+        // this._animatedValueY < -onTapCardDeadZone ||
+        // this._animatedValueY > onTapCardDeadZone
+    ) {
+        this.slideGesture = true;
+    }
+
     if (!this.slideGesture && !this.disableTap && !isSwiping) {
-      this.props.onTapCard(this.state.firstCardIndex)
+        this._animatedValueX = 0;
+        this.props.onTapCard(this.state.firstCardIndex)
     }
     this.slideGesture = false;
     // this.setState({
@@ -359,6 +369,7 @@ class Swiper extends React.Component {
           labelType: LABEL_TYPES.NONE,
         }));
         this.decrementCardIndex(cb)
+        clearTimeout(this.disableTapTimer);
         this.disableTap = false;
     })
   }
@@ -413,6 +424,7 @@ class Swiper extends React.Component {
   ) => {
     this.disableTap = true;
     this.isSwipedRight = x > 0;
+    clearTimeout(this.disableTapTimer);
     Animated.timing(this.state.pan, {
       toValue: {
         x: x * 4.5,
@@ -432,7 +444,9 @@ class Swiper extends React.Component {
       } else {
         this.incrementCardIndex(onSwiped)
       }
-      this.disableTap = false;
+      this.disableTapTimer = setTimeout(() => {
+          this.disableTap = false;
+      }, 300);
     })
   }
 
@@ -441,7 +455,7 @@ class Swiper extends React.Component {
       toValue: 1,
       friction: this.props.zoomFriction,
       duration: this.props.zoomAnimationDuration,
-    }).start()
+    }).start();
   }
 
   incrementCardIndex = onSwiped => {
@@ -730,6 +744,7 @@ class Swiper extends React.Component {
   renderSecondCard = () => {
     const { secondCardIndex } = this.state
     const { cards, renderCard } = this.props
+
     if (secondCardIndex === this.state.firstCardIndex) {
       return null;
     }
@@ -793,7 +808,6 @@ class Swiper extends React.Component {
       (labelType === LABEL_TYPES.RIGHT && disableRightSwipe) ||
       (labelType === LABEL_TYPES.TOP && disableTopSwipe)
 
-    console.log(labelType);
     if (
       !overlayLabels ||
       !overlayLabels[labelType] ||
@@ -802,11 +816,9 @@ class Swiper extends React.Component {
     ) {
       return null
     }
-      console.log('1');
     if (this.state.withoutLabels) {
       return null;
     }
-    console.log('render');
     return (
       <Animated.View
           pointerEvents={'none'}
@@ -972,25 +984,25 @@ Swiper.defaultProps = {
   marginBottom: 0,
   marginTop: 0,
   onSwiped: cardIndex => {
-    console.log(cardIndex)
+    // console.log(cardIndex)
   },
   onSwipedLeft: cardIndex => {
-    console.log('onSwipedLeft')
+    // console.log('onSwipedLeft')
   },
   onSwipedRight: cardIndex => {
-    console.log('onSwipedRight')
+    // console.log('onSwipedRight')
   },
   onSwipedTop: cardIndex => {
-    console.log('onSwipedTop')
+    // console.log('onSwipedTop')
   },
   onSwipedBottom: cardIndex => {
-    console.log('onSwipedBottom')
+    // console.log('onSwipedBottom')
   },
   onSwipedAll: () => {
-    console.log('onSwipedAll')
+    // console.log('onSwipedAll')
   },
   onTapCard: (cardIndex) => {
-    console.log('Tapped card at ' + cardIndex)
+    // console.log('Tapped card at ' + cardIndex)
   },
   onTapCardDeadZone: 5,
   outputCardOpacityRangeX: [0.8, 1, 1, 1, 0.8],
