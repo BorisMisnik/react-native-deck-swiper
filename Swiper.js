@@ -28,6 +28,7 @@ class Swiper extends React.Component {
       labelType: LABEL_TYPES.NONE,
       slideGesture: false,
       withoutLabels: this.props.withoutLabels,
+
     }
 
     this.panResponderLocked = props.cards.length <= 1;
@@ -35,6 +36,12 @@ class Swiper extends React.Component {
     this.state.previousCardIndex = this.calculatePreviousCardIndex(
       props.cardIndex
     )
+  }
+
+  componentDidMount() {
+      if (this.props.onLayout) {
+          this.props.onLayout()
+      }
   }
 
   componentWillReceiveProps (newProps) {
@@ -113,7 +120,9 @@ class Swiper extends React.Component {
 
     this.customCardStyle = this.props.cardStyle
   }
-
+  getPanX() {
+    return this.state.pan;
+  }
   initializePanResponder = () => {
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: (event, gestureState) => true,
@@ -541,14 +550,19 @@ class Swiper extends React.Component {
     return [this.props.overlayLabelWrapperStyle, dynamicStyles, { opacity }]
   }
 
-  calculateOverlayElementStyle = () => {
+  calculateOverlayElementStyle = (isSkip) => {
     let dynamicStyles = this.props.overlayLabels[this.state.labelType].style.element
 
-    const opacity = this.props.animateOverlayLabelsOpacity
-      ? this.interpolateOverlayElement()
-      : 1;
+    if (!this.props.animateOverlayLabelsOpacity) {
+        return [{opacity: 1}, {...dynamicStyles}];
+    }
 
-    return [{opacity: opacity}, {...dynamicStyles}]
+    const result = this.interpolateOverlayElement(isSkip);
+    return [
+        {opacity: result.opacity},
+        {...dynamicStyles},
+        {transform: [{translateX: result.translateX}]}
+    ];
   }
 
   calculateSwipableCardStyle = () => {
@@ -637,26 +651,38 @@ class Swiper extends React.Component {
         outputRange: this.props.outputOverlayLabelsOpacityRangeY
       })
     }
-
     return opacity
   }
 
-  interpolateOverlayElement = () => {
+  interpolateOverlayElement = (isSkip) => {
     const animatedValueX = Math.abs(this._animatedValueX)
     const animatedValueY = Math.abs(this._animatedValueY)
-    let opacity
+    const {animateIconLikeAndSkip} = this.props;
+    let opacity = 1;
+    let translateX = 0;
     let width = this.props.itemWidth;
 
     if (animatedValueX > animatedValueY) {
       opacity = this.state.pan.x.interpolate({
         inputRange: [-width, -width / 5, 0, width / 5, width],
         outputRange: [1, 1, 0, 1, 1],
-      })
-    } else {
-      return 0;
+      });
+      if (animateIconLikeAndSkip) {
+          if (isSkip) {
+              translateX = this.state.pan.x.interpolate({
+                  inputRange: [-width, 0],
+                  outputRange: [-width / 3,  -24],
+              })
+          } else {
+              translateX = this.state.pan.x.interpolate({
+                  inputRange: [0, width],
+                  outputRange: [24, width  / 3],
+              })
+          }
+      }
     }
 
-    return opacity;
+    return {opacity, translateX};
   }
 
   interpolateRotation = () => {
@@ -665,7 +691,7 @@ class Swiper extends React.Component {
       outputRange: this.props.outputRotationRange
     })
   }
-    
+
 
   render () {
     return (
@@ -738,7 +764,7 @@ class Swiper extends React.Component {
           </Animated.View>
         );
     }
-    
+
   }
 
   renderSecondCard = () => {
@@ -819,10 +845,12 @@ class Swiper extends React.Component {
     if (this.state.withoutLabels) {
       return null;
     }
+    const isSkip = overlayLabels[labelType].isSkip;
+
     return (
       <Animated.View
           pointerEvents={'none'}
-          style={this.calculateOverlayElementStyle()}
+          style={this.calculateOverlayElementStyle(isSkip)}
       >
         { overlayLabels[labelType].element2 &&
           overlayLabels[labelType].element2()
