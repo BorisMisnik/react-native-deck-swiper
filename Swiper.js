@@ -150,6 +150,7 @@ class Swiper extends React.Component {
     if (this.props.disablePanHandlers) {
       return;
     }
+    clearTimeout(this.onLongPressTimeout);
     let { overlayOpacityHorizontalThreshold, overlayOpacityVerticalThreshold } = this.props
     if (!overlayOpacityHorizontalThreshold) {
       overlayOpacityHorizontalThreshold = this.props.horizontalThreshold
@@ -215,6 +216,13 @@ class Swiper extends React.Component {
       x: 0,
       y: 0
     })
+
+    this.onLongPressTimeout = setTimeout(() => {
+      if (this.props.onLongPress) {
+          this.props.onLongPress();
+      }
+      this.onLongPress = true;
+    }, this.props.longPressDelay); //
   }
 
   validPanResponderRelease = () => {
@@ -232,6 +240,8 @@ class Swiper extends React.Component {
       isSwipingBottom
     } = this.getSwipeDirection(this._animatedValueX, this._animatedValueY)
 
+    clearTimeout(this.onLongPressTimeout);
+
     return (
       (isSwipingLeft && !disableLeftSwipe) ||
       (isSwipingRight && !disableRightSwipe) ||
@@ -244,6 +254,9 @@ class Swiper extends React.Component {
     if (this.props.disablePanHandlers) {
       return;
     }
+
+    clearTimeout(this.onLongPressTimeout);
+
     if (this.panResponderLocked) {
       this.state.pan.setValue({
         x: 0,
@@ -287,9 +300,11 @@ class Swiper extends React.Component {
         this.slideGesture = true;
     }
 
-    if (!this.slideGesture && !this.disableTap && !isSwiping) {
+    if (!this.slideGesture && !this.disableTap && !isSwiping && !this.onLongPress) {
         this._animatedValueX = 0;
         this.props.onTapCard(this.state.firstCardIndex)
+    } else {
+        this.onLongPress = false;
     }
     this.slideGesture = false;
     // this.setState({
